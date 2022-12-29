@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>case-manager</title>
+		<link rel="stylesheet" href="../../component/pear/css/pear.css" />
+	</head>
+	<body class="pear-container">
+		<div class="layui-card">
+			<div class="layui-card-body">
+				<form class="layui-form" action="">
+					<div class="layui-form-item">
+						<div class="layui-form-item layui-inline">
+							<label class="layui-form-label">description</label>
+							<div class="layui-input-inline">
+								<input type="text" name="description" placeholder="" class="layui-input">
+							</div>
+						</div>
+						<div class="layui-form-item layui-inline">
+							<button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="case-query">
+								<i class="layui-icon layui-icon-search"></i>
+								查询
+							</button>
+							<button type="reset" class="pear-btn pear-btn-md">
+								<i class="layui-icon layui-icon-refresh"></i>
+								重置
+							</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+		<div class="layui-card">
+			<div class="layui-card-body">
+				<table id="case-table" lay-filter="case-table"></table>
+			</div>
+		</div>
+
+		<script type="text/html" id="case-toolbar">
+			<button class="pear-btn pear-btn-primary pear-btn-md" lay-event="add">
+		        <i class="layui-icon layui-icon-add-1"></i>
+		        新建用例
+		    </button>
+		</script>
+
+		<script type="text/html" id="case-bar">
+			<button class="pear-btn pear-btn-success pear-btn-sm" lay-event="debug"><i class="layui-icon layui-icon-play"></i></button>
+		    <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i class="layui-icon layui-icon-delete"></i></button>
+			<button class="pear-btn pear-btn-success pear-btn-sm" lay-event="detail"><i class="layui-icon layui-icon-chart-screen"></i></button>
+		</script>
+
+		<script type="text/html" id="case-enable">
+			<input type="checkbox" name="enable" value="{{d.id}}" lay-skin="switch" lay-text="able|unable" lay-filter="case-enable" {{ d.enable== true ? 'checked' : '' }} />
+		</script>
+
+		<script type="text/html" id="case-createTime">
+			{{layui.util.toDateString(d.createTime, 'yyyy-MM-dd')}}
+		</script>
+
+		<script src="../../component/layui/layui.js"></script>
+		<script src="../../component/pear/pear.js"></script>
+		<script src="/router/router.js"></script>
+		<script>
+			layui.use(['table', 'form', 'jquery','common','toast','loading'], function() {
+				let table = layui.table;
+				let form = layui.form;
+				let $ = layui.jquery;
+				let toast = layui.toast
+				let loading = layui.loading
+				let common = layui.common;
+
+				let cols = [
+					[{
+							type: 'checkbox'
+						},
+						{
+							title: 'id',
+							field: 'id',
+							align: 'center',
+							width: 10
+						},
+						{
+							title: 'description',
+							field: 'description',
+							align: 'left',
+							edit:  `text`
+						},
+						{
+							title: '执行次数',
+							field: 'execCount',
+							align: 'left'
+						},
+						{
+							title: '失败次数',
+							field: 'failedCount',
+							align: 'left',
+							edit:  `number`
+						},
+						{
+							title: '执行历史',
+							field: 'hisId',
+							align: 'left',
+							edit:  `number`
+						},
+						{
+							title: '成功次数',
+							field: 'passCount',
+							align: 'left',
+							edit:  `number`
+						},
+						{
+							title: '跳过次数',
+							field: 'skipCount',
+							align: 'left',
+							edit:  `number`
+						},
+						{
+							title: '依赖页面',
+							field: 'openId',
+							align: 'left',
+							edit:  `number`
+						},
+						{
+							title: '操作',
+							toolbar: '#case-bar',
+							align: 'center',
+							width: 180
+						}
+					]
+				]
+
+				table.render({
+					elem: '#case-table',
+					url: CASE_API_LIST,
+					page: true,
+					cols: cols,
+					parseData: function(res){ //res 即为原始返回的数据
+						return {
+							"code": res.code, //解析接口状态
+							"msg": res.message, //解析提示文本
+							"count": res.data.total, //解析数据长度
+							"data": res.data.row //解析数据列表
+						};
+					},
+					skin: 'line',
+					toolbar: '#case-toolbar',
+					defaultToolbar: [{
+						title: '刷新',
+						layEvent: 'refresh',
+						icon: 'layui-icon-refresh',
+					}, 'filter', 'print', 'exports']
+				});
+
+				table.on('tool(case-table)', function(obj) {
+					if (obj.event === 'remove') {
+						window.remove(obj);
+					}else if (obj.event === 'debug') {
+						window.debug(obj);
+					}else if (obj.event === 'detail') {
+						window.detail(obj);
+					}
+				});
+
+				table.on('toolbar(case-table)', function(obj) {
+					if (obj.event === 'add') {
+						window.add();
+					} else if (obj.event === 'refresh') {
+						window.refresh();
+					} else if (obj.event === 'batchRemove') {
+						window.batchRemove(obj);
+					}
+				});
+
+				table.on('edit(case-table)', function(obj) {
+					loading.Load(1,'updating...');
+					postData(CASE_API_UPDATE, obj.data)
+						.then(data => {
+							console.log(data); // JSON data parsed by `data.json()` call
+							toast.success({title: 'updated '+obj.field + ' to ' + obj.value,message: data.message ,position: 'topRight'});
+						}).catch((error) => {
+							toast.error({title: 'updateError',message: error,position: 'topRight'});
+						});
+					loading.loadRemove(500);
+				});
+
+				form.on('submit(case-query)', function(data) {
+					table.reload('case-table', {
+						where: data.field
+					})
+					return false;
+				});
+
+				form.on('switch(case-enable)', function(obj) {
+					layer.tips(this.value + ' ' + this.name + '：' + obj.elem.checked, obj.othis);
+				});
+
+				window.debug = function(obj) {
+					loading.Load(1,'CASE_API_EXECUTE ...');
+					postData(CASE_API_EXECUTE, obj.data)
+							.then(data => {
+								console.log(data); // JSON data parsed by `data.json()` call
+								if (data.code == 200 || data.code == 0){
+									toast.success({title: 'debug success ',message: data,position: 'topRight'});
+								}else {
+									toast.error({title: 'debug failed ',message: 'code :' + data.code + ' ' +data.message,position: 'topRight'});
+								}
+							})
+							.catch((error) => {
+								console.log(error)
+								toast.error({title: 'debug failed ',message: error,position: 'topRight'});
+							});
+					loading.loadRemove(1000)
+				};
+				
+				window.detail = function(obj) {
+					layer.open({
+						type: 2,
+						title: '用例详情: ' + obj.data.description,
+						shade: 0.1,
+						area: [common.isModile()?'100%':'100%', common.isModile()?'100%':'100%'],
+						content: './detail.html?caseId='+obj.data.id + "&openId=" + obj.data.openId
+					});
+				};
+
+				window.add = function() {
+					loading.Load(1,'creating...');
+					postData(CASE_API_CREATE, {
+						description :"快速创建，请修改...",
+					})
+					.then(data => {
+						if (data.code == 200 || data.code == 0){
+							toast.success({title: 'create success ',message: data.data.caseId,position: 'topRight'});
+							table.reload('case-table')
+						}else {
+							toast.error({title: 'create failed1 ',message: 'code :' + data.code + ' ' +data.message,position: 'topRight'});
+						}
+					})
+					.catch((error) => {
+						console.log(error)
+						toast.error({title: 'create failed ',message: error,position: 'topRight'});
+					});
+					loading.loadRemove(500);
+				}
+
+
+				window.remove = function(obj) {
+					layer.confirm('确定要删除该用户', {
+						icon: 3,
+						title: '提示'
+					}, function(index) {
+						layer.close(index);
+						let loading = layer.load();
+						$.ajax({
+							url: MODULE_PATH + "remove/" + obj.data['caseId'],
+							dataType: 'json',
+							type: 'delete',
+							success: function(result) {
+								layer.close(loading);
+								if (result.success) {
+									layer.msg(result.msg, {
+										icon: 1,
+										time: 1000
+									}, function() {
+										obj.del();
+									});
+								} else {
+									layer.msg(result.msg, {
+										icon: 2,
+										time: 1000
+									});
+								}
+							}
+						})
+					});
+				}
+
+				window.batchRemove = function(obj) {
+					
+					var checkIds = common.checkField(obj,'caseId');
+					
+					if (checkIds === "") {
+						layer.msg("未选中数据", {
+							icon: 3,
+							time: 1000
+						});
+						return false;
+					}
+					
+					layer.confirm('确定要删除这些用户', {
+						icon: 3,
+						title: '提示'
+					}, function(index) {
+						layer.close(index);
+						let loading = layer.load();
+						$.ajax({
+							url: MODULE_PATH + "batchRemove/" + ids,
+							dataType: 'json',
+							type: 'delete',
+							success: function(result) {
+								layer.close(loading);
+								if (result.success) {
+									layer.msg(result.msg, {
+										icon: 1,
+										time: 1000
+									}, function() {
+										table.reload('case-table');
+									});
+								} else {
+									layer.msg(result.msg, {
+										icon: 2,
+										time: 1000
+									});
+								}
+							}
+						})
+					});
+				}
+
+				window.refresh = function(param) {
+					table.reload('case-table');
+				}
+			})
+		</script>
+	</body>
+</html>

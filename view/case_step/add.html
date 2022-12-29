@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>新增页面</title>
+		<link rel="stylesheet" href="../../../component/pear/css/pear.css" />
+	</head>
+	<body>
+		<form class="layui-form" action="">
+			<div class="mainBox">
+				<div class="main-container">
+					<div class="layui-form-item">
+						<label class="layui-form-label">stepId</label>
+						<div class="layui-input-block">
+							<select name="stepId" id="stepId" lay-verify="required" >
+								<option value="请选择"></option>
+							</select>
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">input</label>
+						<div class="layui-input-block">
+							<input type="text" name="input" lay-verify="input" autocomplete="off" placeholder="请输入input"
+								   class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">assertExpect</label>
+						<div class="layui-input-block">
+							<input type="text" name="assertExpect" lay-verify="title" autocomplete="off" placeholder="请输入assertExpect"
+								   class="layui-input">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="bottom">
+				<div class="button-container">
+					<button type="submit" class="pear-btn pear-btn-primary pear-btn-sm" lay-submit=""
+						lay-filter="step-save">
+						<i class="layui-icon layui-icon-ok"></i>
+						提交
+					</button>
+					<button type="reset" class="pear-btn pear-btn-sm">
+						<i class="layui-icon layui-icon-refresh"></i>
+						重置
+					</button>
+				</div>
+			</div>
+		</form>
+		<script src="../../../component/layui/layui.js"></script>
+		<script src="../../../component/pear/pear.js"></script>
+		<script src="/router/router.js"></script>
+		<script>
+			layui.use(['form', 'jquery','toast'], function() {
+				let form = layui.form;
+				let $ = layui.jquery;
+				let toast = layui.toast
+				let pageIdFrom = getQueryVariable("page")
+				
+				// 获取页面中元素下拉列表
+				// getStepSelector($,"#stepId",form,pageIdFrom)
+				getStepSelector($,"#stepId",form)
+
+				form.on('submit(step-save)', function(data) {
+					data.field['target_page'] = pageIdFrom
+					postData(CASE_STEP_API_CREATE, data.field)
+							.then(data => {
+								if (data.code == 200 || data.code == 0){
+									parent.layer.close(parent.layer.getFrameIndex(window
+											.name)); //关闭当前页
+									parent.layui.table.reload("case_step-table");
+								}else {
+									toast.error({title: 'create failed1 ',message: 'code :' + data.code + ' ' +data.message,position: 'topRight'});
+								}
+							})
+							.catch((error) => {
+								console.log(error)
+								toast.error({title: 'create failed ',message: error,position: 'topRight'});
+							});
+
+					return false;
+				});
+			})
+		</script>
+		<script>
+		</script>
+	</body>
+</html>

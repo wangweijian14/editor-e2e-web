@@ -1,0 +1,177 @@
+<meta charset="utf-8">
+<title>step-manager</title>
+<link rel="stylesheet" href="../../component/pear/css/pear.css" />
+
+<table id="test" lay-filter="test"></table>
+
+<!-- 推荐 -->
+<template id="TPL-select-primary">
+  {{# var citys = d.citys || [{"id": "010", title: "北京"},{"id": "021", title: "上海"},{"id": "0571", title: "杭州"}]; }}
+  <select name="city" class="layui-border select-demo-primary" style="height: 36px;" lay-ignore>
+    <option value="">原生 select 下拉</option>
+    {{# layui.each(citys, function(i, v){ }}
+    <option value="{{= v.id }}">{{= v.title }}</option>
+    {{# }); }}
+  </select> 
+</template>
+
+<!-- 不推荐（因为当 select 出现在 table 底部时，可能会撑起多余高度） -->
+<template id="TPL-select-city">
+  {{# var citys = d.citys || [{"id": "城市-0", title: "北京"},{"id": "城市-1", title: "上海"},{"id": "城市-2", title: "杭州"}]; }}
+  {{# var selected = d.city; }}
+  <select name="city" lay-filter="select-demo">
+    <option value="">select 方式</option>
+    {{# layui.each(citys, function(i, v){ }}
+    
+    {{#  if(selected === v.id){ }}
+     <option selected value="{{= v.id }}">{{= v.title }}</option>
+    {{#  } else { }}
+      <option value="{{= v.id }}">{{= v.title }}</option>
+    {{#  } }} 
+
+    {{# }); }}
+  </select> 
+</template>
+
+<!-- 推荐 -->
+<template id="TPL-dropdpwn-demo">
+  <button class="layui-btn layui-btn-primary dropdpwn-demo">
+    {{= d.fieldname2 || '下拉菜单' }}
+    <i class="layui-icon layui-icon-down layui-font-12"></i>
+  </button>
+</template>
+
+<!-- laydate -->
+<template id="TPL-laydate-demo">
+  <input class="layui-input laydate-demo" placeholder="选择日期" value="{{- d.fieldname3 || '' }}">
+</template>
+
+<!-- colorpicker -->
+<template id="TPL-colorpicker-demo">
+  {{# var color = d.color || ['#009688','#5FB878','#1E9FFF','#FF5722','#FFB800','#393D49'][Math.round(Math.random()*5)]; }}
+  <div class="colorpicker-demo" lay-options="{color: '{{= color }}'}"></div>
+</template>
+
+<script src="../../component/layui/layui.js"></script>
+<script src="../../component/pear/pear.js"></script>
+<script src="/router/router.js"></script>
+
+<script>
+    layui.use(function(){
+  var $ = layui.$;
+  var table = layui.table;
+  var form = layui.form;
+  var dropdown = layui.dropdown;
+  var laydate = layui.laydate;
+  var colorpicker = layui.colorpicker;
+  
+  // 显示当前 layui version
+  layer.msg('Layui 版本: v'+ layui.v, {
+    offset: '10px',
+    time: 10*1000,
+    closeBtn: 1,
+    icon: 6
+  });
+  
+  // 执行一个 table 实例
+  table.render({
+    elem: '#test'
+    //,height: 'full-52'
+    ,url: '//unpkg.com/outeres@0.0.10/json/table/user.json' //数据接口（此处为静态数据，仅作演示）
+    ,page: true //开启分页
+    //,toolbar: 'default' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
+    //,totalRow: true //开启合计行
+    ,css: [
+      // 设置单元格样式
+      '.layui-table-cell{height: 50px; line-height: 40px; overflow: visible;}',
+      '.layui-table-cell .layui-colorpicker{width: 38px; height: 38px;}'
+    ].join('')
+    ,cols: [[ //表头
+      {field: 'id', title: 'ID', width:100, fixed: 'left'}
+      ,{field: 'city', title: '原生 select', width:150, templet: '#TPL-select-primary'} 
+      ,{field: 'city', title: 'layui select', width:150, templet: '#TPL-select-city'} 
+      ,{field: 'classify', title: 'dropdown', width:150, templet: '#TPL-dropdpwn-demo'} 
+      ,{field: 'date', title: 'laydate', width:150, templet: '#TPL-laydate-demo'} 
+      ,{field: 'color', title: 'colorpicker', width:100, align: 'center', templet: '#TPL-colorpicker-demo'}
+      ,{field: 'sign', title: '签名', minWidth: 200}
+    ]]
+    ,done: function(res, curr, count){
+      // 获取当前行数据
+      table.getRowData = function(elem){
+        var index = $(elem).closest('tr').data('index');
+        return table.cache['test'][index] || {};
+      };
+      
+      // 原生 select 事件
+      $('.select-demo-primary').on('change', function(){
+        var value = this.value;
+        console.log(value); // 获取选中项 value
+        
+        // 获取当前行数据(如 id 等字段，以作为数据修改的索引)
+        var data = table.getRowData(this);
+        console.log(data);
+      });
+      
+      // layui form select 事件
+      form.on('select(select-demo)', function(obj){
+        console.log(obj); // 获取选中项数据
+        
+        // 获取当前行数据(如 id 等字段，以作为数据修改的索引)
+        var data = table.getRowData(obj.elem);
+        console.log(data);
+      });
+      
+      // dropdown 方式的下拉选择
+      dropdown.render({
+        elem: '.dropdpwn-demo'
+        // ,trigger: 'hover'
+        // 此处的 data 值，可根据 done 返回的 res 遍历来赋值
+        ,data: [{
+          title: 'menu item111111'
+          ,id: 100
+        },{
+          title: 'menu item222222'
+          ,id: 101
+        },{
+          title: 'menu item333333'
+          ,id: 102
+        }]
+        ,click: function(obj){
+          layer.tips('点击了：'+ obj.title, this.elem, {tips: [1, '#5FB878']});
+          
+          // 获取当前行数据(如 id 等字段，以作为数据修改的索引)
+          var data = table.getRowData(this.elem);
+          console.log(data);
+        }
+      });
+      
+      // laydate
+      laydate.render({
+        elem: '.laydate-demo',
+        done: function(value, date, endDate){
+          layer.msg(value);
+          
+          // 获取当前行数据(如 id 等字段，以作为数据修改的索引)
+          var data = table.getRowData(this.elem);
+          console.log(data);
+        }
+      });
+      
+      // colorpicker
+      colorpicker.render({
+        elem: '.colorpicker-demo',
+        done: function(color){
+          layer.msg(color);
+          
+          // 获取当前行数据(如 id 等字段，以作为数据修改的索引)
+          var data = table.getRowData(this.elem);
+          console.log(data);
+        }
+      });
+      
+      // ……
+    }
+  });
+});
+
+</script>

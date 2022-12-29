@@ -1,0 +1,52 @@
+[{
+		"id": 1,
+		"title": "工作空间",
+		"icon": "layui-icon layui-icon-console",
+		"type": 0,
+		"href": "",
+		"children": [{
+			"id": 10,
+			"title": "dashboard",
+			"icon": "layui-icon layui-icon-console",
+			"type": 1,
+			"openType": "_iframe",
+			"href": "view/console/console1.html"
+		}, {
+			"id": 13,
+			"title": "element",
+			"icon": "layui-icon layui-icon-console",
+			"type": 1,
+			"openType": "_iframe",
+			"href": "view/element/list.html"
+		}, {
+			"id": 14,
+			"title": "page",
+			"icon": "layui-icon layui-icon-console",
+			"type": 1,
+			"openType": "_iframe",
+			"href": "view/page/list.html"
+		}, {
+			"id": 15,
+			"title": "step",
+			"icon": "layui-icon layui-icon-console",
+			"type": 1,
+			"openType": "_iframe",
+			"href": "view/step/list.html"
+		}, {
+			"id": 16,
+			"title": "case-step",
+			"icon": "layui-icon layui-icon-console",
+			"type": 1,
+			"openType": "_iframe",
+			"href": "view/case_step/list.html"
+		}, {
+			"id": 17,
+			"title": "case",
+			"icon": "layui-icon layui-icon-console",
+			"type": 1,
+			"openType": "_iframe",
+			"href": "view/case/list.html"
+		}]
+	}
+
+]

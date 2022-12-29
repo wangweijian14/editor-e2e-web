@@ -1,0 +1,22 @@
+[
+  {"name" :"FindTarget-「找到元素」","id" :1},
+  {"name" :"FindAndClick-「找到元素并点击」" ,"id": 2},
+  {"name" :"FindAndInputSth-「找到元素并输入内容」", "id" : 3},
+  {"name" :"FindTargetAttribute-「找到元素并获取元素属性」", "id" : 4},
+  {"name" :"FindTargetText-「找到元素并获取元素的文本内容」", "id" : 5},
+  {"name" :"FindTargetAndIteratorChildAttribute-「找到元素组并遍历元素信息」","id"  : 6},
+  {"name" :"FindTargetAndIteratorChildText-「找到元素组并遍历子节点的文本信息」", "id" : 7},
+  {"name" :"MustText-「找到文本信息」", "id" : 8},
+  {"name" :"FindAndHover-「找到元素并键鼠标悬浮在元素上面」","id"  : 9},
+  {"name" :"「control+a」","id"  : 10},
+  {"name" :"「control+z」","id"  : 11},
+  {"name" :"「control+x」","id"  : 12},
+  {"name" :"「control+c」","id"  : 13},
+  {"name" :"「control+v」","id"  : 14},
+  {"name" :"「enter」","id"  : 15},
+  {"name" :"「esc」","id"  : 16},
+  {"name" :"「arrowLeft」","id"  : 17},
+  {"name" :"「arrowUp」","id"  : 18},
+  {"name" :"「arrowRight」","id"  : 19},
+  {"name" :"「arrowDown」","id"  : 20}
+]

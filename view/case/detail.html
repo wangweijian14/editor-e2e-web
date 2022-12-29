@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>case_step-manager</title>
+		<link rel="stylesheet" href="../../component/pear/css/pear.css" />
+	</head>
+
+	<body class="pear-container">
+	<div class="layui-row layui-col-space10">
+		<div class="layui-col-md12">
+			<div class="layui-card">
+				<div class="layui-card-body">
+					1--2
+				</div>
+			</div>
+		</div>
+		<div class="layui-col-md12">
+			<div class="layui-card">
+				<div class="layui-card-body">
+					<table id="case_step-table" lay-filter="case_step-table"></table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/html" id="case_step-toolbar">
+		<button class="pear-btn pear-btn-primary pear-btn-md" lay-event="add">
+			<i class="layui-icon layui-icon-add-1"></i>
+			新增步骤
+		</button>
+		<button class="pear-btn pear-btn-success pear-btn-md" lay-event="openPage">
+			<i class="layui-icon layui-icon-add-1"></i>
+			打开调试页面
+		</button>
+	</script>
+
+	<script type="text/html" id="case_step-bar">
+		<button class="pear-btn pear-btn-success pear-btn-sm" lay-event="debug"><i class="layui-icon layui-icon-play"></i></button>
+		<button class="pear-btn pear-btn-success pear-btn-sm" lay-event="detail"><i class="layui-icon layui-icon-survey"></i></button>
+		<button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i class="layui-icon layui-icon-delete"></i></button>
+	</script>
+
+	<script type="text/html" id="case_step-enable">
+		<input type="checkbox" name="enable" value="{{d.id}}" lay-skin="switch" lay-text="able|unable" lay-filter="case_step-enable" {{ d.enable== true ? 'checked' : '' }} />
+	</script>
+
+	<script type="text/html" id="case_step-createTime">
+		{{layui.util.toDateString(d.createTime, 'yyyy-MM-dd')}}
+	</script>
+
+	<script src="../../component/layui/layui.js"></script>
+	<script src="../../component/pear/pear.js"></script>
+	<script src="/router/router.js"></script>
+	<script>
+		layui.use(['table', 'form', 'jquery','common','toast','loading'], function() {
+			let table = layui.table;
+			let form = layui.form;
+			let $ = layui.jquery;
+			let toast = layui.toast
+			let loading = layui.loading
+			let common = layui.common;
+			let caseIdFrom = getQueryVariable("caseId")
+			let openIdFrom = getQueryVariable("openId")
+
+
+			// loading.Load(1,'loading...');
+			// 	postData(CASE_API_ONE, {"id": caseIdFrom})
+			// 			.then(data => {
+			// 				console.log(data); // JSON data parsed by `data.json()` call
+			// 				if (data.code == 200 || data.code==0 ){
+			// 					toast.success({title: 'get case detail success !',message: data,position: 'topRight'});
+			// 				}else {
+			// 					toast.error({title: 'debug failed ',message: 'code :' + data.code + ' ' +data.message,position: 'topRight'});
+			// 				}
+			// 			})
+			// 			.catch((error) => {
+			// 				console.log(error)
+			// 				toast.error({title: 'debug failed ',message: error,position: 'topRight'});
+			// 			});
+			// loading.loadRemove(500);
+
+			let params;
+
+			$(".dtl").hide()
+
+			let cols = [
+				[{
+					type: 'checkbox'
+				},
+					{
+						title: 'id',
+						field: 'id',
+						align: 'center',
+						hide: true,
+					},
+					{
+						title: 'stepId',
+						field: 'stepId',
+						align: 'left',
+						hide: true,
+					},
+					{
+						title: 'caseId',
+						field: 'caseId',
+						align: 'left',
+						hide: true,
+					},
+					{
+						title: 'score',
+						field: 'score',
+						align: 'left',
+						edit:  `text`
+					},
+					{
+						title: 'description',
+						field: 'description',
+						align: 'left',
+						edit:  `text`
+					},
+					
+					{
+						title: 'input',
+						field: 'input',
+						align: 'left',
+						edit:  `text`
+					},
+					{
+						title: 'assertExpect',
+						field: 'assertExpect',
+						align: 'left',
+						edit:  `text`
+					},
+					{
+						title: '操作',
+						toolbar: '#case_step-bar',
+						align: 'center',
+					}
+				]
+			]
+
+			table.render({
+				elem: '#case_step-table',
+				url: CASE_STEP_API_LIST,
+				page: true,
+				cols: cols,
+				parseData: function(res){ //res 即为原始返回的数据
+					return {
+						"code": res.code, //解析接口状态
+						"msg": res.message, //解析提示文本
+						"count": res.data.total, //解析数据长度
+						"data": res.data.row //解析数据列表
+					};
+				},
+				skin: 'line',
+				toolbar: '#case_step-toolbar',
+				defaultToolbar: [{
+					title: '刷新',
+					layEvent: 'refresh',
+					icon: 'layui-icon-refresh',
+				}, 'filter', 'print', 'exports'],
+				where: {"caseId":caseIdFrom,"sort":3}
+			});
+
+			table.on('tool(case_step-table)', function(obj) {
+				if (obj.event === 'remove') {
+					window.remove(obj);
+				}else if (obj.event === 'debug') {
+					window.debug(obj);
+				}else if (obj.event === 'detail') {
+					window.detail(obj);
+				}
+			});
+
+			table.on('toolbar(case_step-table)', function(obj) {
+				if (obj.event === 'add') {
+					window.add();
+				} else if (obj.event === 'refresh') {
+					window.refresh();
+				} else if (obj.event === 'openPage' ){
+					window.openPage()
+				}
+			});
+
+			table.on('edit(case_step-table)', function(obj) {
+				loading.Load(1,'updating...');
+				postData(CASE_STEP_UPDATE, obj.data)
+						.then(data => {
+							console.log(data); // JSON data parsed by `data.json()` call
+							toast.success({title: 'updated '+obj.field + ' to ' + obj.value,message: data.message ,position: 'topRight'});
+						}).catch((error) => {
+					toast.error({title: 'updateError',message: error,position: 'topRight'});
+				});
+				loading.loadRemove(500);
+			});
+
+			form.on('submit(case_step-query)', function(data) {
+				table.reload('case_step-table', {
+					where: data.field
+				})
+				return false;
+			});
+
+			form.on('switch(case_step-enable)', function(obj) {
+				layer.tips(this.value + ' ' + this.name + '：' + obj.elem.checked, obj.othis);
+			});
+
+			window.add = function() {
+				layer.open({
+					type: 2,
+					title: '新增',
+					shade: 0.1,
+					area: ['80%', '90%'],
+					content: './add.html?caseId='+caseIdFrom
+				});
+			}
+
+			window.openPage = function() {
+				postData(BROWSER_OPEN_URL_BYID, {'pageId' :openIdFrom })
+				.then(data => {
+					if (data.code == 200 || data.code == 0){
+						toast.success({title: 'browser open pageId : ' + openIdFrom  ,message: "success",position: 'topRight'});
+					}else {
+						toast.error({title: 'open failed! ',message: 'code :' + data.code + ' ' +data.message,position: 'topRight'});
+					}
+				})
+				.catch((error) => {
+					console.log(error)
+					toast.error({title: 'open failed ',message: error,position: 'topRight'});
+				});
+			}
+			
+
+			window.detail = function(obj) {
+
+				form.val("detail-form", {
+					"description": `ssssss` // "name": "value"
+				});
+
+				params = obj;
+				$(".empty").hide();
+				// 获取 action 详细信息
+				postData(CASE_STEP_API_ONE, {id : obj.data.id})
+						.then(data => {
+							if (data.code == 0 ||data.code == 200){
+								let dat =  data.data.step
+								console.log(dat)
+								//给表单赋值
+								form.val("detail-form", {
+									"description": dat.step.description // "name": "value"
+									,"action": dat.step.actionId
+									,"element": dat.element.Element.description
+									,"page": dat.page.description
+									,"path": dat.element.Element.path
+								});
+								$(".dtl").show()
+							}else {
+								toast.error({title: 'debug failed ',message: 'code :' + data.code + ' ' +data.message,position: 'topRight'});
+							}
+						})
+						.catch((error) => {
+							console.log(error)
+							toast.error({title: 'debug failed ',message: error,position: 'topRight'});
+						});
+			}
+
+			window.debug = function(obj) {
+				loading.Load(1,'debugging...');
+				postData(CASE_STEP_DEBUG, obj.data)
+						.then(data => {
+							// console.log(data.data.R); // JSON data parsed byValidator `data.json()` call
+							let targetReturn = "";
+							let classNameReturn = "";
+							let assert =  JSON.stringify(data.data.AssertRes,null, 4)
+							if (data.code == 200 || data.code == 0){
+								if (data.data.R.target != null){
+									targetReturn = data.data.R.target.Object.description
+									classNameReturn = data.data.R.target.Object.className
+								}
+								let messageReturn = '<p>className : ' + classNameReturn +  
+									'</p><p>target : ' + targetReturn + '</p><p>returned : ' +
+											data.data.R.returned + '</p>' + 
+											'<p>assert: <p/><pre>' + assert  + ' </pre>';
+								toast.success({title: 'debug success ','message': messageReturn, 'position': 'topRight'});
+							}else {
+								let msg = '<p>code : ' + data.code + '</p><p>error : ' + data.message
+								toast.error({title: 'debug failed ','message': msg ,'position': 'topRight'});
+							}
+						})
+						.catch((error) => {
+							console.log(error)
+							toast.error({title: 'debug failed ',message: error,position: 'topRight'});
+						});
+				loading.loadRemove(500);
+			};
+
+			window.remove = function(obj) {
+				layer.confirm('确定要删除该步骤？', {
+					icon: 3,
+					title: '提示'
+				}, function(index) {
+					layer.close(index);
+					let loading = layer.load();
+					$.ajax({
+						url: CASE_STEP_REMOVE + "?id=" + obj.data['id'],
+						dataType: 'json',
+						type: 'post',
+						success: function(data) {
+							layer.close(loading);
+							if (data.code == 200 || data.code == 0){
+								toast.success({title: 'remove ' +obj.data['id']+ '  success ',message: data,position: 'topRight'});
+								table.reload('case_step-table');
+							}else {
+								toast.error({title: 'remove failed ',message: 'code :' + data.code + ' ' +data.message,position: 'topRight'});
+							}
+						}
+					})
+				});
+			}
+
+
+			window.refresh = function(param) {
+				table.reload('case_step-table');
+			}
+		})
+	</script>
+
+	</body>
+
+
+</html>

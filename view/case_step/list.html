@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>case_step-manager</title>
+		<link rel="stylesheet" href="../../component/pear/css/pear.css" />
+	</head>
+
+	<body class="pear-container">
+	<div class="layui-row layui-col-space10">
+		<div class="layui-col-md12">
+			<div class="layui-card">
+				<div class="layui-card-body">
+					<form class="layui-form" action="">
+						<div class="layui-form-item">
+							<div class="layui-form-item layui-inline">
+								<label class="layui-form-label">stepId</label>
+								<div class="layui-input-inline">
+									<input type="text" name="stepId" placeholder="" class="layui-input">
+								</div>
+							</div>
+							<div class="layui-form-item layui-inline">
+								<label class="layui-form-label">input</label>
+								<div class="layui-input-inline">
+									<input type="text" name="input" placeholder="" class="layui-input">
+								</div>
+							</div>
+							<div class="layui-form-item layui-inline">
+								<label class="layui-form-label">assertExpect</label>
+								<div class="layui-input-inline">
+									<input type="text" name="assertExpect" placeholder="" class="layui-input">
+								</div>
+							</div>
+							<div class="layui-form-item layui-inline">
+								<button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="case_step-query">
+									<i class="layui-icon layui-icon-search"></i>
+									查询
+								</button>
+								<button type="reset" class="pear-btn pear-btn-md">
+									<i class="layui-icon layui-icon-refresh"></i>
+									重置
+								</button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+		<div class="layui-col-md6">
+			<div class="layui-card">
+				<div class="layui-card-body">
+					<table id="case_step-table" lay-filter="case_step-table"></table>
+				</div>
+			</div>
+		</div>
+		<div class="layui-col-md6">
+			<div class="layui-card">
+				<div class="layui-card-body">
+					<svg class="empty" style="margin-top: 50px;margin-left: 220px;margin-bottom: 80px;" width="184" height="152"
+						 viewBox="0 0 184 152" xmlns="http://www.w3.org/2000/svg">
+						<g fill="none" fillRule="evenodd">
+							<g transform="translate(24 31.67)">
+								<ellipse fillOpacity=".8" fill="#F5F5F7" cx="67.797" cy="106.89" rx="67.797" ry="12.668"></ellipse>
+								<path d="M122.034 69.674L98.109 40.229c-1.148-1.386-2.826-2.225-4.593-2.225h-51.44c-1.766 0-3.444.839-4.592 2.225L13.56 69.674v15.383h108.475V69.674z"
+									  fill="#AEB8C2"></path>
+								<path d="M101.537 86.214L80.63 61.102c-1.001-1.207-2.507-1.867-4.048-1.867H31.724c-1.54 0-3.047.66-4.048 1.867L6.769 86.214v13.792h94.768V86.214z"
+									  fill="url(#linearGradient-1)" transform="translate(13.56)"></path>
+								<path d="M33.83 0h67.933a4 4 0 0 1 4 4v93.344a4 4 0 0 1-4 4H33.83a4 4 0 0 1-4-4V4a4 4 0 0 1 4-4z" fill="#F5F5F7"></path>
+								<path d="M42.678 9.953h50.237a2 2 0 0 1 2 2V36.91a2 2 0 0 1-2 2H42.678a2 2 0 0 1-2-2V11.953a2 2 0 0 1 2-2zM42.94 49.767h49.713a2.262 2.262 0 1 1 0 4.524H42.94a2.262 2.262 0 0 1 0-4.524zM42.94 61.53h49.713a2.262 2.262 0 1 1 0 4.525H42.94a2.262 2.262 0 0 1 0-4.525zM121.813 105.032c-.775 3.071-3.497 5.36-6.735 5.36H20.515c-3.238 0-5.96-2.29-6.734-5.36a7.309 7.309 0 0 1-.222-1.79V69.675h26.318c2.907 0 5.25 2.448 5.25 5.42v.04c0 2.971 2.37 5.37 5.277 5.37h34.785c2.907 0 5.277-2.421 5.277-5.393V75.1c0-2.972 2.343-5.426 5.25-5.426h26.318v33.569c0 .617-.077 1.216-.221 1.789z"
+									  fill="#DCE0E6"></path>
+							</g>
+							<path d="M149.121 33.292l-6.83 2.65a1 1 0 0 1-1.317-1.23l1.937-6.207c-2.589-2.944-4.109-6.534-4.109-10.408C138.802 8.102 148.92 0 161.402 0 173.881 0 184 8.102 184 18.097c0 9.995-10.118 18.097-22.599 18.097-4.528 0-8.744-1.066-12.28-2.902z"
+								  fill="#DCE0E6"></path>
+							<g transform="translate(149.65 15.383)" fill="#FFF">
+								<ellipse cx="20.654" cy="3.167" rx="2.849" ry="2.815"></ellipse>
+								<path d="M5.698 5.63H0L2.898.704zM9.259.704h4.985V5.63H9.259z"></path>
+							</g>
+						</g>
+					</svg>
+					<form class="layui-form dtl" lay-filter="detail-form">
+						<fieldset class="layui-elem-field layui-field-title">
+							<legend>步骤信息 - ↓</legend>
+						</fieldset>
+						<div class="layui-form-item">
+							<label class="layui-form-label">步骤信息</label>
+							<div class="layui-input-block">
+								<input type="text" name="description" placeholder="description" autocomplete="off" class="layui-input" readonly>
+							</div>
+						</div>
+						<div class="layui-form-item">
+							<label class="layui-form-label">所在页面</label>
+							<div class="layui-input-block">
+								<input type="text" name="page" placeholder="page" autocomplete="off" class="layui-input" readonly>
+							</div>
+						</div>
+						<div class="layui-form-item">
+							<label class="layui-form-label">操作元素</label>
+							<div class="layui-input-block">
+								<input type="text" name="element" hover placeholder="element" autocomplete="off" class="layui-input" readonly>
+							</div>
+						</div>
+						<div class="layui-form-item">
+							<label class="layui-form-label">元素路径</label>
+							<div class="layui-input-block">
+								<input type="text" name="path" hover placeholder="path" autocomplete="off" class="layui-input" readonly>
+							</div>
+						</div>
+						<div class="layui-form-item">
+							<label class="layui-form-label">动作信息</label>
+							<div class="layui-input-block">
+								<select name="action" id="action" lay-verify="required" readonly>
+									<option value="请选择"></option>
+								</select>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/html" id="case_step-toolbar">
+		<button class="pear-btn pear-btn-primary pear-btn-md" lay-event="add">
+			<i class="layui-icon layui-icon-add-1"></i>
+			新增
+		</button>
+		<button class="pear-btn pear-btn-danger pear-btn-md" lay-event="batchRemove">
+			<i class="layui-icon layui-icon-delete"></i>
+			删除
+		</button>
+	</script>
+
+	<script type="text/html" id="case_step-bar">
+		<button class="pear-btn pear-btn-success pear-btn-sm" lay-event="debug"><i class="layui-icon layui-icon-play"></i></button>
+		<button class="pear-btn pear-btn-success pear-btn-sm" lay-event="detail"><i class="layui-icon layui-icon-survey"></i></button>
+	</script>
+
+	<script type="text/html" id="case_step-enable">
+		<input type="checkbox" name="enable" value="{{d.id}}" lay-skin="switch" lay-text="able|unable" lay-filter="case_step-enable" {{ d.enable== true ? 'checked' : '' }} />
+	</script>
+
+	<script type="text/html" id="case_step-createTime">
+		{{layui.util.toDateString(d.createTime, 'yyyy-MM-dd')}}
+	</script>
+
+	<script src="../../component/layui/layui.js"></script>
+	<script src="../../component/pear/pear.js"></script>
+	<script src="/router/router.js"></script>
+	<script>
+		layui.use(['table', 'form', 'jquery','common','toast','loading'], function() {
+			let table = layui.table;
+			let form = layui.form;
+			let $ = layui.jquery;
+			let toast = layui.toast
+			let loading = layui.loading
+			let common = layui.common;
+
+			// 获取下拉Action菜单
+			getActionSelector($,"#action",form)
+
+			let params;
+
+			$(".dtl").hide()
+
+			let cols = [
+				[{
+					type: 'checkbox'
+				},
+					{
+						title: 'id',
+						field: 'id',
+						align: 'center',
+						width: 10
+					},{
+						title: 'description',
+						field: 'description',
+						align: 'left',
+						edit:  `text`
+					},
+					{
+						title: 'stepId',
+						field: 'stepId',
+						align: 'left',
+						edit:  `number`
+					},
+					{
+						title: 'input',
+						field: 'input',
+						align: 'left',
+						edit:  `text`
+					},{
+						title: 'caseId',
+						field: 'caseId',
+						align: 'left',
+						edit:  `text`
+					},
+					{
+						title: 'assertExpect',
+						field: 'assertExpect',
+						align: 'left',
+						edit:  `text`
+					},
+					{
+						title: '操作',
+						toolbar: '#case_step-bar',
+						align: 'center',
+						width: 130
+					}
+				]
+			]
+
+			table.render({
+				elem: '#case_step-table',
+				url: CASE_STEP_API_LIST,
+				page: true,
+				cols: cols,
+				parseData: function(res){ //res 即为原始返回的数据
+					return {
+						"code": res.code, //解析接口状态
+						"msg": res.message, //解析提示文本
+						"count": res.data.total, //解析数据长度
+						"data": res.data.row //解析数据列表
+					};
+				},
+				skin: 'line',
+				toolbar: '#case_step-toolbar',
+				defaultToolbar: [{
+					title: '刷新',
+					layEvent: 'refresh',
+					icon: 'layui-icon-refresh',
+				}, 'filter', 'print', 'exports']
+			});
+
+			table.on('tool(case_step-table)', function(obj) {
+				if (obj.event === 'remove') {
+					window.remove(obj);
+				}else if (obj.event === 'debug') {
+					window.debug(obj);
+				}else if (obj.event === 'detail') {
+					window.detail(obj);
+				}
+			});
+
+			table.on('toolbar(case_step-table)', function(obj) {
+				if (obj.event === 'add') {
+					window.add();
+				} else if (obj.event === 'refresh') {
+					window.refresh();
+				} else if (obj.event === 'batchRemove') {
+					window.batchRemove(obj);
+				}
+			});
+
+			table.on('edit(case_step-table)', function(obj) {
+				loading.Load(1,'updating...');
+				postData(CASE_STEP_UPDATE, obj.data)
+						.then(data => {
+							console.log(data); // JSON data parsed by `data.json()` call
+							toast.success({title: 'updated '+obj.field + ' to ' + obj.value,message: data.message ,position: 'topRight'});
+						}).catch((error) => {
+					toast.error({title: 'updateError',message: error,position: 'topRight'});
+				});
+				loading.loadRemove(500);
+			});
+
+			form.on('submit(case_step-query)', function(data) {
+				table.reload('case_step-table', {
+					where: data.field
+				})
+				return false;
+			});
+
+			form.on('switch(case_step-enable)', function(obj) {
+				layer.tips(this.value + ' ' + this.name + '：' + obj.elem.checked, obj.othis);
+			});
+
+			window.add = function() {
+				layer.open({
+					type: 2,
+					title: '新增',
+					shade: 0.1,
+					area: [common.isModile()?'100%':'500px', common.isModile()?'100%':'400px'],
+					content: './add.html'
+				});
+			}
+
+			window.detail = function(obj) {
+
+				form.val("detail-form", {
+					"description": `ssssss` // "name": "value"
+				});
+
+				params = obj;
+				$(".empty").hide();
+				// 获取 action 详细信息
+				postData(CASE_STEP_API_ONE, {id : obj.data.id})
+						.then(data => {
+							if (data.code == 0 ||data.code == 200){
+								let dat =  data.data.step
+								console.log(dat)
+								//给表单赋值
+								form.val("detail-form", {
+									"description": dat.step.description // "name": "value"
+									,"action": dat.step.actionId
+									,"element": dat.element.Element.description
+									,"page": dat.page.description
+									,"path": dat.element.Element.path
+								});
+								$(".dtl").show()
+							}else {
+								toast.error({title: 'debug failed ',message: 'code :' + data.code + ' ' +data.message,position: 'topRight'});
+							}
+						})
+						.catch((error) => {
+							console.log(error)
+							toast.error({title: 'debug failed ',message: error,position: 'topRight'});
+						});
+			}
+
+			window.debug = function(obj) {
+				loading.Load(1,'debugging...');
+				postData(CASE_STEP_DEBUG, obj.data)
+						.then(data => {
+							console.log(data); // JSON data parsed by `data.json()` call
+							if (data.code == 200){
+								toast.success({title: 'debug success ',message: data,position: 'topRight'});
+							}else {
+								toast.error({title: 'debug failed ',message: 'code :' + data.code + ' ' +data.message,position: 'topRight'});
+							}
+						})
+						.catch((error) => {
+							console.log(error)
+							toast.error({title: 'debug failed ',message: error,position: 'topRight'});
+						});
+				loading.loadRemove(500);
+			};
+
+			window.remove = function(obj) {
+				layer.confirm('确定要删除该用户', {
+					icon: 3,
+					title: '提示'
+				}, function(index) {
+					layer.close(index);
+					let loading = layer.load();
+					$.ajax({
+						// url: MODULE_PATH + "remove/" + obj.data['case_stepId'],
+						dataType: 'json',
+						type: 'delete',
+						success: function(result) {
+							layer.close(loading);
+							if (result.success) {
+								layer.msg(result.msg, {
+									icon: 1,
+									time: 1000
+								}, function() {
+									obj.del();
+								});
+							} else {
+								layer.msg(result.msg, {
+									icon: 2,
+									time: 1000
+								});
+							}
+						}
+					})
+				});
+			}
+
+			window.batchRemove = function(obj) {
+
+				var checkIds = common.checkField(obj,'case_stepId');
+
+				if (checkIds === "") {
+					layer.msg("未选中数据", {
+						icon: 3,
+						time: 1000
+					});
+					return false;
+				}
+
+				layer.confirm('确定要删除这些用户', {
+					icon: 3,
+					title: '提示'
+				}, function(index) {
+					layer.close(index);
+					let loading = layer.load();
+					$.ajax({
+						url: MODULE_PATH + "batchRemove/" + ids,
+						dataType: 'json',
+						type: 'delete',
+						success: function(result) {
+							layer.close(loading);
+							if (result.success) {
+								layer.msg(result.msg, {
+									icon: 1,
+									time: 1000
+								}, function() {
+									table.reload('case_step-table');
+								});
+							} else {
+								layer.msg(result.msg, {
+									icon: 2,
+									time: 1000
+								});
+							}
+						}
+					})
+				});
+			}
+
+			window.refresh = function(param) {
+				table.reload('case_step-table');
+			}
+		})
+	</script>
+
+	</body>
+
+
+</html>
