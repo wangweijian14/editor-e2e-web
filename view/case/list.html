@@ -47,9 +47,10 @@
 			<button class="pear-btn pear-btn-success pear-btn-sm" lay-event="debug"><i class="layui-icon layui-icon-play"></i></button>
 		    <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i class="layui-icon layui-icon-delete"></i></button>
 			<button class="pear-btn pear-btn-success pear-btn-sm" lay-event="detail"><i class="layui-icon layui-icon-chart-screen"></i></button>
+			<button class="pear-btn pear-btn pear-btn-sm" lay-event="reports"><i class="layui-icon layui-icon-chart"></i></button>
 		</script>
 
-		<script type="text/html" id="case-enable">
+		<script type="text/html" id="case-report-datail-tpl">
 			<input type="checkbox" name="enable" value="{{d.id}}" lay-skin="switch" lay-text="able|unable" lay-filter="case-enable" {{ d.enable== true ? 'checked' : '' }} />
 		</script>
 
@@ -68,7 +69,6 @@
 				let toast = layui.toast
 				let loading = layui.loading
 				let common = layui.common;
-
 				let cols = [
 					[{
 							type: 'checkbox'
@@ -88,7 +88,8 @@
 						{
 							title: '执行次数',
 							field: 'execCount',
-							align: 'left'
+							align: 'left',
+							edit:  `number`
 						},
 						{
 							title: '失败次数',
@@ -97,10 +98,10 @@
 							edit:  `number`
 						},
 						{
-							title: '执行历史',
+							title: 'latst',
 							field: 'hisId',
 							align: 'left',
-							edit:  `number`
+							hide:	true
 						},
 						{
 							title: '成功次数',
@@ -124,7 +125,7 @@
 							title: '操作',
 							toolbar: '#case-bar',
 							align: 'center',
-							width: 180
+							width: 200
 						}
 					]
 				]
@@ -158,6 +159,8 @@
 						window.debug(obj);
 					}else if (obj.event === 'detail') {
 						window.detail(obj);
+					}else if (obj.event === 'reports'){
+						window.reports(obj);
 					}
 				});
 
@@ -198,9 +201,23 @@
 					loading.Load(1,'CASE_API_EXECUTE ...');
 					postData(CASE_API_EXECUTE, obj.data)
 							.then(data => {
-								console.log(data); // JSON data parsed by `data.json()` call
 								if (data.code == 200 || data.code == 0){
 									toast.success({title: 'debug success ',message: data,position: 'topRight'});
+
+									layer.open({
+										type: 2,
+										title: 'reports: ' + obj.data.description,
+										shade: 0.1,
+										area: [common.isModile()?'100%':'90%', common.isModile()?'100%':'80%'],
+										content: '../report/case-result.html',
+										success: function(layero,index){
+											// 获取子页面的iframe
+											let iframe = window['layui-layer-iframe' + index];
+											// 向子页面的全局函数child传参
+											iframe.setData(data.data)
+										}
+									});
+
 								}else {
 									toast.error({title: 'debug failed ',message: 'code :' + data.code + ' ' +data.message,position: 'topRight'});
 								}
@@ -219,6 +236,16 @@
 						shade: 0.1,
 						area: [common.isModile()?'100%':'100%', common.isModile()?'100%':'100%'],
 						content: './detail.html?caseId='+obj.data.id + "&openId=" + obj.data.openId
+					});
+				};
+
+				window.reports = function(obj) {
+					layer.open({
+						type: 2,
+						title: 'reports: ' + obj.data.description,
+						shade: 0.1,
+						area: [common.isModile()?'100%':'90%', common.isModile()?'100%':'80%'],
+						content: '../report/list.html?caseId='+obj.data.id,
 					});
 				};
 
@@ -262,48 +289,6 @@
 										time: 1000
 									}, function() {
 										obj.del();
-									});
-								} else {
-									layer.msg(result.msg, {
-										icon: 2,
-										time: 1000
-									});
-								}
-							}
-						})
-					});
-				}
-
-				window.batchRemove = function(obj) {
-					
-					var checkIds = common.checkField(obj,'caseId');
-					
-					if (checkIds === "") {
-						layer.msg("未选中数据", {
-							icon: 3,
-							time: 1000
-						});
-						return false;
-					}
-					
-					layer.confirm('确定要删除这些用户', {
-						icon: 3,
-						title: '提示'
-					}, function(index) {
-						layer.close(index);
-						let loading = layer.load();
-						$.ajax({
-							url: MODULE_PATH + "batchRemove/" + ids,
-							dataType: 'json',
-							type: 'delete',
-							success: function(result) {
-								layer.close(loading);
-								if (result.success) {
-									layer.msg(result.msg, {
-										icon: 1,
-										time: 1000
-									}, function() {
-										table.reload('case-table');
 									});
 								} else {
 									layer.msg(result.msg, {

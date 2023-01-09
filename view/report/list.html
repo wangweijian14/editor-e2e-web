@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>report-list</title>
+		<link rel="stylesheet" href="../../component/pear/css/pear.css" />
+	</head>
+	<body class="pear-container">
+		<div class="layui-card">
+			<div class="layui-card-body">
+				<form class="layui-form" action="">
+					<div class="layui-form-item">
+						<div class="layui-form-item layui-inline">
+							<label class="layui-form-label">caseId</label>
+							<div class="layui-input-inline">
+								<input type="text" name="caseId" placeholder="" class="layui-input">
+							</div>
+						</div>
+						<div class="layui-form-item layui-inline">
+							<button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="case-query">
+								<i class="layui-icon layui-icon-search"></i>
+								查询
+							</button>
+							<button type="reset" class="pear-btn pear-btn-md">
+								<i class="layui-icon layui-icon-refresh"></i>
+								重置
+							</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+		<div class="layui-card">
+			<div class="layui-card-body">
+				<table id="case-report-table" lay-filter="case-report-table"></table>
+			</div>
+		</div>
+
+		<script type="text/html" id="case-report-toolbar">
+			<button class="pear-btn pear-btn-primary pear-btn-md" lay-event="add">
+		        <i class="layui-icon layui-icon-add-1"></i>
+		        重新执行？
+		    </button>
+		</script>
+
+		<script type="text/html" id="case-report-bar">
+			<button class="pear-btn pear-btn pear-btn-sm" lay-event="detail"><i class="layui-icon layui-icon-chart"></i></button>
+		</script>
+
+		<script type="text/html" id="case-enable">
+			<input type="checkbox" name="enable" value="{{d.id}}" lay-skin="switch" lay-text="able|unable" lay-filter="case-enable" {{ d.enable== true ? 'checked' : '' }} />
+		</script>
+
+		<script type="text/html" id="case-createTime">
+			{{layui.util.toDateString(d.createTime, 'yyyy-MM-dd')}}
+		</script>
+
+		<script src="../../component/layui/layui.js"></script>
+		<script src="../../component/pear/pear.js"></script>
+		<script src="/router/router.js"></script>
+		<script>
+			layui.use(['table', 'form', 'jquery','common','toast','loading'], function() {
+				let table = layui.table;
+				let form = layui.form;
+				let $ = layui.jquery;
+				let toast = layui.toast
+				let loading = layui.loading
+				let common = layui.common;
+				let caseIdFrom = getQueryVariable("caseId")
+
+				let cols = [
+					[
+						{
+							field: 'id',
+							hide: true
+						},
+						{
+							field: 'caseId',
+							hide: true,
+						},
+						{
+							title: 'message',
+							field: 'message',
+							align: 'left',
+							hide: true,
+						},
+						{
+							title: 'caseDesc',
+							field: 'caseDesc',
+							align: 'left',
+							edit:  `text`
+						},
+						{
+							title: 'status',
+							field: 'status',
+							align: 'left',
+						},
+						{
+							title: 'runUser',
+							field: 'runUser',
+							align: 'left',
+						},
+						{
+							title: 'runIp',
+							field: 'runIp',
+							align: 'left',
+						},
+						{
+							title: 'runTime',
+							field: 'runTime',
+							align: 'left',
+						},{
+							title: '详细查看',
+							toolbar: '#case-report-bar',
+							align: 'center',
+							width: 200
+						}
+					]
+				]
+
+				table.render({
+					elem: '#case-report-table',
+					url: CASEREPORT_API_LIST,
+					page: true,
+					cols: cols,
+					parseData: function(res){ //res 即为原始返回的数据
+						return {
+							"code": res.code, //解析接口状态
+							"msg": res.message, //解析提示文本
+							"count": res.data.total, //解析数据长度
+							"data": res.data.row //解析数据列表
+						};
+					},
+					skin: 'line',
+					toolbar: '#case-report-toolbar',
+					defaultToolbar: [{
+						title: '刷新',
+						layEvent: 'refresh',
+						icon: 'layui-icon-refresh',
+					}, 'filter', 'print', 'exports'],
+					where :{
+						caseId : caseIdFrom,
+					}
+				});
+
+				table.on('tool(case-report-table)', function(obj) {
+					if (obj.event === 'detail') {
+						window.detail(obj);
+					}
+				});
+
+
+				table.on('edit(case-report-table)', function(obj) {
+					loading.Load(1,'updating...');
+					postData(CASE_API_UPDATE, obj.data)
+						.then(data => {
+							console.log(data); // JSON data parsed by `data.json()` call
+							toast.success({title: 'updated '+obj.field + ' to ' + obj.value,message: data.message ,position: 'topRight'});
+						}).catch((error) => {
+							toast.error({title: 'updateError',message: error,position: 'topRight'});
+						});
+					loading.loadRemove(500);
+				});
+
+				form.on('submit(case-query)', function(data) {
+					table.reload('case-report-table', {
+						where: data.field
+					})
+					return false;
+				});
+
+				form.on('switch(case-enable)', function(obj) {
+					layer.tips(this.value + ' ' + this.name + '：' + obj.elem.checked, obj.othis);
+				});
+
+				window.detail = function(obj) {
+					layer.open({
+						type: 2,
+						title: '用例: ' + obj.data.description + ' 结果',
+						shade: 0.1,
+						area: [common.isModile()?'100%':'100%', common.isModile()?'100%':'100%'],
+						content: './case-result.html',
+						success: function(layero,index){
+							let messag = JSON.parse(obj.data.message)
+							// 获取子页面的iframe
+							let iframe = window['layui-layer-iframe' + index];
+							// 向子页面的全局函数child传参
+							iframe.setData(messag)
+						},
+					});
+				};
+
+				window.refresh = function(param) {
+					table.reload('case-report-table');
+				}
+			})
+		</script>
+	</body>
+</html>
