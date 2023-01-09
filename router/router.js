@@ -27,6 +27,9 @@ let BROWSER_OPEN_URL_BYID = server +  "/case/page-open-id"
 let CASEREPORT_API_LIST = server + "/report/list"
 let CASEREPORT_API_ONE = server + "/report/get-one"
 let ACTION_PATH = server +  "/admin/data/action.json"
+let MONITOR_PAGES = server + "/monitor/pages"
+let MONITOR_PAGEONE = server + "/monitor/page/one"
+let MONITOR_PAGESCREENSHOT = server + "/monitor/screenshot"
 
 // Example POST method implementation:
 async function postData(url = '', data = {}) {

@@ -1,0 +1,126 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>monitor-list</title>
+    <link rel="stylesheet" href="../../component/pear/css/pear.css" />
+  </head>
+  <body>
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <table id="monitor-table" lay-filter="monitor-table"></table>
+        </div>
+    </div>
+    <script type="text/html" id="monitor-bar">
+        <button class="pear-btn pear-btn pear-btn-sm" lay-event="detail"><i class="layui-icon layui-icon-chart"></i></button>
+    </script>
+    <script src="../../component/layui/layui.js"></script>
+	<script src="../../component/pear/pear.js"></script>
+    <script src="/router/router.js"></script>
+    <!-- MONITOR_PAGES -->
+
+    <script>
+    layui.use(['table', 'form', 'jquery','common','toast','loading'], function() {
+        let table = layui.table;
+        let toast = layui.toast
+        let common = layui.common;
+        
+        let cols = [
+            [
+                {
+                    title: 'attached',
+                    field: 'attached',
+                },
+                {
+                    title: 'browserContextId',
+                    field: 'browserContextId',
+                },
+                {
+                    title: 'canAccessOpener',
+                    field: 'canAccessOpener',
+                },
+                {
+                    title: 'targetId',
+                    field: 'targetId',
+                },
+                {
+                    title: 'title',
+                    field: 'title',
+                    align: 'left',
+                },
+                {
+                    title: 'type',
+                    field: 'type',
+                    align: 'left',
+                },
+                {
+                    title: 'url',
+                    field: 'url',
+                    align: 'left',
+                },{
+                    title: '详细查看',
+                    toolbar: '#monitor-bar',
+                    align: 'center',
+                    width: 200
+                }
+            ]
+        ]
+
+        table.render({
+            elem: '#monitor-table',
+            url: MONITOR_PAGES,
+            cols: cols,
+            parseData: function(res){ //res 即为原始返回的数据
+                return {
+                    "code": res.code, //解析接口状态
+                    "msg": res.message, //解析提示文本
+                    "count": res.data.pages.length, //解析数据长度
+                    "data": res.data.pages //解析数据列表
+                };
+            },
+            skin: 'line',
+            defaultToolbar: [{
+                title: '刷新',
+                layEvent: 'refresh',
+                icon: 'layui-icon-refresh',
+            }, 'filter', 'print', 'exports'],
+            
+        });
+
+        window.detail = function(obj) {
+            layer.open({
+                type: 2,
+                title: 'monitor: ' + obj.data.title  + ' url: ' + obj.data.url,
+                shade: 0.1,
+                area: [common.isModile()?'100%':'100%', common.isModile()?'100%':'100%'],
+                content: './monitor.html?pageId='+obj.data.targetId,
+            });
+        };
+
+        table.on('tool(monitor-table)', function(obj) {
+					if (obj.event === 'detail') {
+						window.detail(obj);
+					}
+				});
+
+        window.refresh = function(param) {
+            table.reload('monitor-table');
+        }
+
+    })
+
+    //   async function update() {
+    //     const list = await (await fetch()).json()
+    //     let html = ''
+    //     list.forEach((el) => {
+    //       html += ` + "`" + `<a href='${MONITOR_PAGEONE}?pageId=${el.data.targetId}' title="${el.data.url}">${el.data.title}</a>` + "`" + `
+    //     })
+
+    //     window.targets.innerHTML = html
+
+    //     setTimeout(update, 1000)
+    //   }
+
+    //   update()
+    </script>
+  </body>
+</html>
